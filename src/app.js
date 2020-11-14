@@ -1,20 +1,25 @@
 const express = require("express")
+const bodyParser = require("body-parser")
+const mongoose = require("mongoose")
+
 const app = express()
 
-//rotas
-const index = require("./routes/index")
-const livros = require("./routes/livrosRoute")
+mongoose.connect("mongodb://localhost:27017/livros", { 
+  useNewUrlParser: true, 
+  useUnifiedTopology: true 
+});
 
-app.use(function (req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*")
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept"
-  )
-  next()
-})
+let db = mongoose.connection;
 
-app.use("/", index)
-app.use("/livros", livros)
+db.on("error", console.log.bind(console, "connection error:"))
+db.once("open", function (){
+  console.log("Successful connection.")
+});
 
-module.exports = app
+const livros = require("./routes/livroRouter")
+
+app.use(bodyParser.json());
+
+app.use("/livros", livros);
+
+module.exports = app;
